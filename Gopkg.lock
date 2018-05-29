@@ -6,6 +6,7 @@
   name = "github.com/galaco/bsp"
   packages = [
     ".",
+    "flags",
     "lumps",
     "primitives/area",
     "primitives/areaportal",
@@ -32,7 +33,6 @@
     "primitives/overlayfade",
     "primitives/physcollide",
     "primitives/plane",
-    "primitives/portal",
     "primitives/primitive",
     "primitives/primvert",
     "primitives/texdata",
@@ -48,7 +48,6 @@
   branch = "master"
   name = "github.com/galaco/source-tools-common"
   packages = [
-    "constants",
     "entity",
     "texdatastringtable",
     "vmath/vector"
@@ -63,23 +62,21 @@
 
 [[projects]]
   branch = "master"
-  name = "github.com/galaco/vrad"
-  packages = [
-    "cache",
-    "common/constants",
-    "common/types",
-    "rad/clustertable/list",
-    "vmath/polygon",
-    "vmath/quaterion",
-    "vmath/vector"
-  ]
-  revision = "c908afe1408fd83ce29cc6e4e5a801c995a51d72"
-
-[[projects]]
-  branch = "master"
   name = "github.com/go-gl/mathgl"
   packages = ["mgl32"]
   revision = "5ab0e04e1f55a10f3a71b1fccc60ca2ee9a0bc02"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/rainliu/gocl"
+  packages = ["cl"]
+  revision = "b13bb0e071db9ebab2851952439c06d97ead9430"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/samuel/go-opencl"
+  packages = ["cl"]
+  revision = "cbcfd10c32ad8fcde8ba7a9d9322a2c2458f0ce5"
 
 [[projects]]
   name = "github.com/urfave/cli"
@@ -96,6 +93,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "017e3e9167e9273c6c519adebd9641f986ea07f9b7ca87073b8e4d255dc125d2"
+  inputs-digest = "405dd055c4810f06e695cf9d6b50cd3251ed81e389e3eefb018f0e8bbc6070eb"
   solver-name = "gps-cdcl"
   solver-version = 1

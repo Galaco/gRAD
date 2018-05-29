@@ -161,6 +161,7 @@ func (f *Bsp) GetAmbientLight() *light.DirectLight {
 
 // ExtractLights
 func (f *Bsp) ExtractLights(useHDR bool) {
+	log.Printf("Extracting lights from entdata...\n")
 	var numLights = 0
 	for i := 0; i < f.entities.Length(); i++ {
 		e := f.entities.Get(i)
@@ -190,7 +191,7 @@ func (f *Bsp) ExtractLights(useHDR bool) {
 
 	}
 
-	log.Printf("Found %d Facelights\n", numLights)
+	log.Printf("Found %d Facelights\n\n", numLights)
 }
 
 // PrepareAmbientSamples

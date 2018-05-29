@@ -32,3 +32,15 @@
 [[constraint]]
   name = "github.com/urfave/cli"
   version = "1.20.0"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/microo8/blackcl"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/samuel/go-opencl"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/rainliu/gocl"
