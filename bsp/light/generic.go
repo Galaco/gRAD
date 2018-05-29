@@ -5,7 +5,7 @@ import (
 	"github.com/galaco/source-tools-common/entity"
 	"github.com/galaco/source-tools-common/vmath/vector"
 	"github.com/go-gl/mathgl/mgl32"
-	"github.com/galaco/goRAD/common"
+	"github.com/galaco/gRAD/common"
 )
 
 

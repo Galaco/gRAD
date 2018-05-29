@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/urfave/cli"
-	"github.com/galaco/goRAD/bsp"
+	"github.com/galaco/gRAD/bsp"
 	"log"
 )
 

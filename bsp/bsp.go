@@ -18,7 +18,7 @@ import (
 	"github.com/galaco/source-tools-common/entity"
 	"github.com/galaco/source-tools-common/texdatastringtable"
 	"strings"
-	"github.com/galaco/goRAD/bsp/light"
+	"github.com/galaco/gRAD/bsp/light"
 	"log"
 	"github.com/galaco/bsp/flags"
 	"github.com/galaco/bsp/primitives/leafambientindex"
