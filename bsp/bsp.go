@@ -28,9 +28,9 @@ import (
 
 type Bsp struct {
 	// 1:1 Lump data extracts
-	planes []plane.Plane
+	Planes []plane.Plane
 	texData []texdata.TexData
-	vertexes []mgl32.Vec3
+	Vertexes []mgl32.Vec3
 	visibility visibility.Vis
 	texInfo []texinfo.TexInfo
 	faces []face.Face
@@ -38,9 +38,9 @@ type Bsp struct {
 	leafs []leaf.Leaf
 	leafFaces []uint16
 	leafBrushes []uint16
-	edges [][2]uint16
-	surfEdges []int32
-	models []model.Model
+	Edges [][2]uint16
+	SurfEdges []int32
+	Models []model.Model
 	brushes []brush.Brush
 	brushSides []brushside.BrushSide
 	areas []area.Area
@@ -60,6 +60,8 @@ type Bsp struct {
 	ambientLightIndicesHDR []leafambientindex.LeafAmbientIndex
 	ambientLightSamples []leafambientlighting.LeafAmbientLighting
 	ambientLightSamplesHDR []leafambientlighting.LeafAmbientLighting
+
+	IsHDR bool
 }
 
 func (f *Bsp) GetEntities() *entity.List {
@@ -71,7 +73,7 @@ func (f *Bsp) GetTexDataStringTable() *texdatastringtable.TexDataStringTable {
 }
 
 func (f *Bsp) GetPlanes() *[]plane.Plane {
-	return &f.planes
+	return &f.Planes
 }
 
 func (f *Bsp) GetTexData() *[]texdata.TexData {
@@ -79,7 +81,7 @@ func (f *Bsp) GetTexData() *[]texdata.TexData {
 }
 
 func (f *Bsp) GetVertexes() *[]mgl32.Vec3 {
-	return &f.vertexes
+	return &f.Vertexes
 }
 
 func (f *Bsp) GetVisibility() *visibility.Vis {
@@ -91,8 +93,8 @@ func (f *Bsp) GetTexInfo() *[]texinfo.TexInfo {
 }
 
 // Radiosity uses either HDR or LDR
-func (f *Bsp) GetFaces(useHDR bool) *[]face.Face {
-	if useHDR == true {
+func (f *Bsp) GetFaces() *[]face.Face {
+	if f.IsHDR == true {
 		return &f.facesHDR
 	}
 	return &f.faces
@@ -112,15 +114,15 @@ func (f *Bsp) GetLeafBrushes() *[]uint16 {
 }
 
 func (f *Bsp) GetEdges() *[][2]uint16 {
-	return &f.edges
+	return &f.Edges
 }
 
 func (f *Bsp) GetSurfEdges() *[]int32 {
-	return &f.surfEdges
+	return &f.SurfEdges
 }
 
 func (f *Bsp) GetModels() *[]model.Model {
-	return &f.models
+	return &f.Models
 }
 
 func (f *Bsp) GetBrushes() *[]brush.Brush {
@@ -160,7 +162,7 @@ func (f *Bsp) GetAmbientLight() *light.DirectLight {
 }
 
 // ExtractLights
-func (f *Bsp) ExtractLights(useHDR bool) {
+func (f *Bsp) ExtractLights() {
 	log.Printf("Extracting lights from entdata...\n")
 	var numLights = 0
 	for i := 0; i < f.entities.Length(); i++ {
@@ -173,17 +175,17 @@ func (f *Bsp) ExtractLights(useHDR bool) {
 		l := light.NewDirectLight(e)
 
 		if classname == "light" {
-			light.ParseLightGeneric(e, l, useHDR)
+			light.ParseLightGeneric(e, l, f.IsHDR)
 			f.worldLights = append(f.worldLights, *l)
 			continue
 		}
 		if classname == "light_environment" {
-			light.ParseLightGeneric(e, l, useHDR)
-			light.ParseLightEnvironment(e, l, useHDR)
+			light.ParseLightGeneric(e, l, f.IsHDR)
+			light.ParseLightEnvironment(e, l, f.IsHDR)
 			f.ambientLight = *l
 		}
 		if classname == "light_spot" {
-			light.ParseLightGeneric(e, l, useHDR)
+			light.ParseLightGeneric(e, l, f.IsHDR)
 			light.ParseLightSpot(e, l, &f.entities)
 			f.worldLights = append(f.worldLights, *l)
 			continue
@@ -195,7 +197,7 @@ func (f *Bsp) ExtractLights(useHDR bool) {
 }
 
 // PrepareAmbientSamples
-func (f *Bsp) PrepareAmbientSamples(useHDR bool) {
+func (f *Bsp) PrepareAmbientSamples() {
 	const SAMPLE_SPACING_X = 128.0
 	const SAMPLE_SPACING_Y = 128.0
 	const SAMPLE_SPACING_Z = 256.0
@@ -266,7 +268,7 @@ func (f *Bsp) PrepareAmbientSamples(useHDR bool) {
 		}
 	}
 
-	if useHDR == true {
+	if f.IsHDR == true {
 		f.ambientLightIndicesHDR = ambientLightIndices
 		f.ambientLightSamplesHDR = ambientLightSamples
 	} else {

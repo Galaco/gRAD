@@ -4,42 +4,46 @@ import (
 	"log"
 	"github.com/urfave/cli"
 	"github.com/galaco/gRAD/bsp"
-	"github.com/galaco/gRAD/radiosity"
-	"github.com/galaco/gRAD/radiosity/simulator"
-	"github.com/galaco/gRAD/radiosity/simulator/opencl"
+	"github.com/galaco/gRAD/simulator"
+	"github.com/galaco/gRAD/simulator/opencl"
 )
 
 var useHDR = false
-var useGPU = true
 
 // Rad
 // Main rad function
 func Rad(c *cli.Context) error {
 	log.Printf("     Galaco's Radiosity Simulator     \n")
-	log.Printf("See: https://github.com/galaco/RADiant\n\n")
+	log.Printf("See: https://github.com/galaco/gRAD\n\n")
 
 	// Step 1: Load files
 	filename := c.Args().Get(0)
 	file,err := bsp.ImportFromFile(filename)
+	file.IsHDR = useHDR
 
 	if err != nil {
 		return err
 	}
 	// Extract lights. Either hdr or ldr
-	file.ExtractLights(useHDR)
+	file.ExtractLights()
 
 	// Step 2: Prepare environment
-	file.PrepareAmbientSamples(useHDR)
-	tracer := radiosity.SetupAccelerationStructure(file, useHDR)
+	file.PrepareAmbientSamples()
 
 	var runner simulator.ISimulator
-	if useGPU == true {
+
+	// Determines which simulator to use
+	switch c.Args().Get(1) {
+	case "opencl":
+		tracer := opencl.NewRayTracer()
+		tracer.SetupAccelerationStructure(file)
 		runner,err = opencl.NewSimulator(tracer, file)
-		if err != nil {
-			log.Fatal(err)
-		}
-	} else {
-		log.Fatal("GPU must be enabled...")
+	default:
+		log.Fatal("Invalid simulator name.")
+	}
+
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	// Step 3: Run

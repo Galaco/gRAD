@@ -67,18 +67,18 @@ func getRawBSP(filename string) (*bsp.Bsp, error) {
 // Essentially adds methods to structs, and only contains relevant lump data
 func transformRawBspToRadBsp(file *bsp.Bsp) (*Bsp, error) {
 	radBSP := Bsp{}
-	radBSP.planes = (*file.GetLump(bsp.LUMP_PLANES).GetContents()).GetData().([]plane.Plane)
+	radBSP.Planes = (*file.GetLump(bsp.LUMP_PLANES).GetContents()).GetData().([]plane.Plane)
 	radBSP.texData = *(*file.GetLump(bsp.LUMP_TEXDATA).GetContents()).GetData().(*[]texdata.TexData)
-	radBSP.vertexes = *(*file.GetLump(bsp.LUMP_VERTEXES).GetContents()).GetData().(*[]mgl32.Vec3)
+	radBSP.Vertexes = *(*file.GetLump(bsp.LUMP_VERTEXES).GetContents()).GetData().(*[]mgl32.Vec3)
 	radBSP.visibility = *(*file.GetLump(bsp.LUMP_VISIBILITY).GetContents()).GetData().(*visibility.Vis)
 	radBSP.texInfo = *(*file.GetLump(bsp.LUMP_TEXINFO).GetContents()).GetData().(*[]texinfo.TexInfo)
 	radBSP.faces = *(*file.GetLump(bsp.LUMP_FACES).GetContents()).GetData().(*[]face.Face)
 	radBSP.leafs = *(*file.GetLump(bsp.LUMP_LEAFS).GetContents()).GetData().(*[]leaf.Leaf)
 	radBSP.leafFaces = *(*file.GetLump(bsp.LUMP_LEAFFACES).GetContents()).GetData().(*[]uint16)
 	radBSP.leafBrushes = *(*file.GetLump(bsp.LUMP_LEAFBRUSHES).GetContents()).GetData().(*[]uint16)
-	radBSP.edges = *(*file.GetLump(bsp.LUMP_EDGES).GetContents()).GetData().(*[][2]uint16)
-	radBSP.surfEdges = *(*file.GetLump(bsp.LUMP_SURFEDGES).GetContents()).GetData().(*[]int32)
-	radBSP.models = *(*file.GetLump(bsp.LUMP_MODELS).GetContents()).GetData().(*[]model.Model)
+	radBSP.Edges = *(*file.GetLump(bsp.LUMP_EDGES).GetContents()).GetData().(*[][2]uint16)
+	radBSP.SurfEdges = *(*file.GetLump(bsp.LUMP_SURFEDGES).GetContents()).GetData().(*[]int32)
+	radBSP.Models = *(*file.GetLump(bsp.LUMP_MODELS).GetContents()).GetData().(*[]model.Model)
 	radBSP.brushes = *(*file.GetLump(bsp.LUMP_BRUSHES).GetContents()).GetData().(*[]brush.Brush)
 	radBSP.brushSides = *(*file.GetLump(bsp.LUMP_BRUSHSIDES).GetContents()).GetData().(*[]brushside.BrushSide)
 	radBSP.areas = *(*file.GetLump(bsp.LUMP_AREAS).GetContents()).GetData().(*[]area.Area)
