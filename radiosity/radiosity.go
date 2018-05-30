@@ -18,7 +18,8 @@ func SetupAccelerationStructure(vradBsp *bsp.Bsp, useHDR bool) *raytracer.RayTra
 	tracer := raytracer.RayTracer{}
 
 	// Create triangles from bsp faces
-	triangles := []raytracer.Triangle{}
+	triangles := [raytracer.MAX_TRIANGLES]raytracer.Triangle{}
+	tIndex := 0
 
 	// Add triangles to raytracer
 	for _,face := range *vradBsp.GetFaces(useHDR) {
@@ -75,12 +76,14 @@ func SetupAccelerationStructure(vradBsp *bsp.Bsp, useHDR bool) *raytracer.RayTra
 				},
 			}
 
-			triangles = append(triangles, tri)
+			triangles[tIndex] = tri
+			tIndex++
 			hasRun = true
 		}
 	}
 
-	tracer.Triangles = &triangles
+	tracer.Triangles = triangles
+	tracer.NumTriangles = tIndex
 
 	// report elapsed time
 	setupEnd := time.Now().UnixNano() / int64(time.Millisecond)

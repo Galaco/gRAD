@@ -10,6 +10,7 @@ import (
 type Simulator struct {
 	device *cl.Device
 	context *cl.Context
+	queue *cl.CommandQueue
 }
 
 // NewSimulator
@@ -22,20 +23,26 @@ func NewSimulator(tracer *raytracer.RayTracer) (*Simulator,error) {
 		return nil, err
 	}
 	devices,err := cl.GetDevices(platforms[0], cl.DeviceTypeAll)
+	if err != nil {
+		return nil, err
+	}
 	context,err := cl.CreateContext(devices)
 	if err != nil {
 		return nil, err
 	}
 
-
 	log.Printf("        Using OpenCL Simulator        \n")
 	log.Printf("Using device: %s\n", strings.TrimRight(devices[0].Name(), "\x00"))
 
-	sendToGPU(context, tracer)
+	queue,err := sendToGPU(devices[0], context, tracer)
+	if err != nil {
+		return nil,err
+	}
 
 	return &Simulator{
 		device: devices[0],
 		context: context,
+		queue: queue,
 	}, nil
 }
 
