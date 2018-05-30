@@ -4,7 +4,8 @@ import (
 	"github.com/samuel/go-opencl/cl"
 	"log"
 	"strings"
-	"github.com/galaco/gRAD/radiosity/raytracer"
+	"github.com/galaco/gRAD/radiosity/simulator/raytracer"
+	"github.com/galaco/gRAD/bsp"
 )
 
 type Simulator struct {
@@ -16,7 +17,7 @@ type Simulator struct {
 // NewSimulator
 // Create a new Radiosity simulator
 // Also sends data to the gpu
-func NewSimulator(tracer *raytracer.RayTracer) (*Simulator,error) {
+func NewSimulator(tracer *raytracer.RayTracer, vradBsp *bsp.Bsp) (*Simulator,error) {
 	platforms,err := cl.GetPlatforms()
 	//device,err := blackcl.GetDefaultDevice()
 	if err != nil {
@@ -31,10 +32,20 @@ func NewSimulator(tracer *raytracer.RayTracer) (*Simulator,error) {
 		return nil, err
 	}
 
+	// Create command queue for device
+	queue,err := context.CreateCommandQueue(devices[0], 0)
+	if err != nil {
+		return nil,err
+	}
+
 	log.Printf("        Using OpenCL Simulator        \n")
 	log.Printf("Using device: %s\n", strings.TrimRight(devices[0].Name(), "\x00"))
 
-	queue,err := sendToGPU(devices[0], context, tracer)
+	err = sendRayTracerToGPU(context, queue, tracer)
+	if err != nil {
+		return nil,err
+	}
+	err = sendBspToGPU(context, queue, vradBsp)
 	if err != nil {
 		return nil,err
 	}

@@ -34,7 +34,7 @@ func Rad(c *cli.Context) error {
 
 	var runner simulator.ISimulator
 	if useGPU == true {
-		runner,err = opencl.NewSimulator(tracer)
+		runner,err = opencl.NewSimulator(tracer, file)
 		if err != nil {
 			log.Fatal(err)
 		}

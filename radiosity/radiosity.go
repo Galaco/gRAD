@@ -2,7 +2,7 @@ package radiosity
 
 import (
 	"github.com/galaco/gRAD/bsp"
-	"github.com/galaco/gRAD/radiosity/raytracer"
+	"github.com/galaco/gRAD/radiosity/simulator/raytracer"
 	"log"
 	"time"
 	"github.com/galaco/bsp/flags"
