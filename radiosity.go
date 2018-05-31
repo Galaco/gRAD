@@ -6,6 +6,7 @@ import (
 	"github.com/galaco/gRAD/bsp"
 	"github.com/galaco/gRAD/simulator"
 	"github.com/galaco/gRAD/simulator/opencl"
+	"github.com/galaco/gRAD/simulator/cpu"
 )
 
 var useHDR = false
@@ -39,7 +40,9 @@ func Rad(c *cli.Context) error {
 		tracer.SetupAccelerationStructure(file)
 		runner,err = opencl.NewSimulator(tracer, file)
 	default:
-		log.Fatal("Invalid simulator name.")
+		tracer := cpu.NewRayTracer()
+		tracer.SetupAccelerationStructure(file)
+		runner,err = cpu.NewSimulator(tracer, file)
 	}
 
 	if err != nil {
