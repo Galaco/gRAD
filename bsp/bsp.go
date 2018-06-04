@@ -61,6 +61,8 @@ type Bsp struct {
 	ambientLightSamples []leafambientlighting.LeafAmbientLighting
 	ambientLightSamplesHDR []leafambientlighting.LeafAmbientLighting
 
+	LightSamples []mgl32.Vec3
+
 	IsHDR bool
 }
 
