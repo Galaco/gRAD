@@ -4,7 +4,7 @@ import (
 	"github.com/samuel/go-opencl/cl"
 	"log"
 	"strings"
-	"github.com/galaco/gRAD/bsp"
+	"github.com/galaco/gRAD/filesystem"
 	"time"
 )
 
@@ -17,7 +17,7 @@ type Simulator struct {
 // NewSimulator
 // Create a new Radiosity simulator
 // Also sends data to the gpu
-func NewSimulator(tracer *RayTracer, vradBsp *bsp.Bsp) (*Simulator,error) {
+func NewSimulator(tracer *RayTracer, vradBsp *filesystem.Bsp) (*Simulator,error) {
 	platforms,err := cl.GetPlatforms()
 	if err != nil {
 		return nil, err

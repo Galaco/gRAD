@@ -2,18 +2,19 @@ package cpu
 
 import (
 	"log"
-	"github.com/galaco/gRAD/bsp"
+	"github.com/galaco/gRAD/filesystem"
+	"time"
 )
 
 type Simulator struct {
 	tracer *RayTracer
-	bsp *bsp.Bsp
+	bsp *filesystem.Bsp
 }
 
 // NewSimulator
 // Create a new Radiosity simulator
 // Also sends data to the gpu
-func NewSimulator(tracer *RayTracer, vradBsp *bsp.Bsp) (*Simulator,error) {
+func NewSimulator(tracer *RayTracer, vradBsp *filesystem.Bsp) (*Simulator,error) {
 	log.Printf("        Using Default CPU Simulator        \n")
 
 	return &Simulator{
@@ -26,9 +27,8 @@ func NewSimulator(tracer *RayTracer, vradBsp *bsp.Bsp) (*Simulator,error) {
 func (rad Simulator) ComputeDirectLighting() {
 	var facesCompleted = 0
 
-	const BLOCK_WIDTH = 16
-	const BLOCK_HEIGHT = 16
-	BLOCK_DIMENSIONS := [2]int{3, 3}
+	const BLOCK_WIDTH = 4
+	const BLOCK_HEIGHT = 4
 	//numFaces := len(*rad.bsp.GetFaces())
 
 	//KERNEL_LAUNCH(
@@ -36,18 +36,29 @@ func (rad Simulator) ComputeDirectLighting() {
 	//	numFaces, blockDim,
 	//	pCudaBSP, const_cast<size_t*>(pDeviceFacesCompleted)
 	//);
+	setupStart := time.Now().UnixNano() / int64(time.Millisecond)
+	for facesCompleted = 0; facesCompleted < len(*rad.bsp.GetFaces()); facesCompleted++ {
+		rad.tracer.mapFaces(rad.bsp, &facesCompleted, [2]int{1, 1}, [2]int{1, 1})
 
-	for bw := 0; bw < BLOCK_WIDTH; bw++ {
-		for bh := 0; bh < BLOCK_HEIGHT; bh++ {
-			for tw := 0; tw < BLOCK_DIMENSIONS[0]; tw++ {
-				for th := 0; th < BLOCK_DIMENSIONS[1]; th++ {
-					rad.tracer.mapFaces(rad.bsp, &facesCompleted, [2]int{bw, bh}, [2]int{tw, th})
-				}
-			}
+		if facesCompleted % 100 == 0 {
+			log.Printf("Processed %d faces\n", facesCompleted)
 		}
 	}
 
-	//rad.tracer.mapFaces(rad.bsp, &facesCompleted)
+	//for bw := 1; bw < BLOCK_WIDTH; bw++ {
+	//	for bh := 1; bh < BLOCK_HEIGHT; bh++ {
+	//		for tw := 1; tw < BLOCK_DIMENSIONS[0]; tw++ {
+	//			for th := 1; th < BLOCK_DIMENSIONS[1]; th++ {
+	//				rad.tracer.mapFaces(rad.bsp, &facesCompleted, [2]int{bw, bh}, [2]int{tw, th})
+	//				facesCompleted++
+	//			}
+	//		}
+	//	}
+	//}
+
+	setupEnd := time.Now().UnixNano() / int64(time.Millisecond)
+	log.Printf("Processed %d faces\n", facesCompleted)
+	log.Printf("Done (%f seconds)\n\n", float32(setupEnd-setupStart) / 1000)
 }
 
 // AntialiasLightmap

@@ -1,8 +1,8 @@
 package cpu
 
 import (
-	radLight "github.com/galaco/gRAD/bsp/light"
-	"github.com/galaco/gRAD/bsp"
+	radLight "github.com/galaco/gRAD/filesystem/light"
+	"github.com/galaco/gRAD/filesystem"
 	"github.com/go-gl/mathgl/mgl32"
 	"github.com/galaco/bsp/primitives/worldlight"
 )
@@ -15,8 +15,8 @@ func attenuate(light *radLight.DirectLight, dist float32) float32 {
 	return c + l * dist + q * dist * dist
 }
 
-func (tracer *RayTracer) mapFaces(vradBsp *bsp.Bsp, facesCompleted *int, blockId [2]int, threadId [2]int) {
-	primaryThread := (threadId[0] == 0 && threadId[1] == 0)
+func (tracer *RayTracer) mapFaces(vradBsp *filesystem.Bsp, facesCompleted *int, blockId [2]int, threadId [2]int) {
+	primaryThread := true//(threadId[0] == 0 && threadId[1] == 0)
 
 	//if (pCudaBSP->tag != CUDABSP::TAG) {
 	//	if (primaryThread) {
@@ -88,7 +88,7 @@ func (tracer *RayTracer) mapFaces(vradBsp *bsp.Bsp, facesCompleted *int, blockId
 		/* Copy our changes back to the CUDABSP. */
 		(*vradBsp.GetFaces())[faceInfo.FaceIndex] = faceInfo.Face
 
-		*facesCompleted += 1
+		//*facesCompleted += 1
 		//atomicAdd(reinterpret_cast<unsigned int*>(facesCompleted), 1)
 		//__threadfence_system()
 	}
@@ -102,7 +102,7 @@ func (tracer *RayTracer) mapFaces(vradBsp *bsp.Bsp, facesCompleted *int, blockId
 	//printf("%u\n", static_cast<unsigned int>(*pFacesCompleted));
 }
 
-func (tracer *RayTracer) sampleAt(vradBsp *bsp.Bsp, samplePos mgl32.Vec3, sampleNormal mgl32.Vec3) mgl32.Vec3 {
+func (tracer *RayTracer) sampleAt(vradBsp *filesystem.Bsp, samplePos mgl32.Vec3, sampleNormal mgl32.Vec3) mgl32.Vec3 {
 	result := mgl32.Vec3{0, 0, 0}
 
 	for lightIndex := 0; lightIndex < len(*vradBsp.GetDirectLights()); lightIndex++ {
@@ -190,7 +190,7 @@ func (tracer *RayTracer) sampleAt(vradBsp *bsp.Bsp, samplePos mgl32.Vec3, sample
 	return result
 }
 
-func (tracer *RayTracer) sampleAtFaceInfo(vradBsp *bsp.Bsp, faceInfo *FaceInfo, s float32, t float32) mgl32.Vec3 {
+func (tracer *RayTracer) sampleAtFaceInfo(vradBsp *filesystem.Bsp, faceInfo *FaceInfo, s float32, t float32) mgl32.Vec3 {
 	samplePos := faceInfo.XYXFromST(s, t)
 	return tracer.sampleAt(vradBsp, samplePos, faceInfo.FaceNorm)
 }

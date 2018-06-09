@@ -5,7 +5,7 @@ import (
 	"github.com/galaco/bsp/primitives/plane"
 	"github.com/galaco/bsp/primitives/texinfo"
 	"github.com/go-gl/mathgl/mgl32"
-	"github.com/galaco/gRAD/bsp"
+	"github.com/galaco/gRAD/filesystem"
 	"unsafe"
 )
 
@@ -26,7 +26,7 @@ type FaceInfo struct {
 	patchStartIndex int
 }
 
-func NewFaceInfo(vradBsp*bsp.Bsp, faceIndex int) *FaceInfo{
+func NewFaceInfo(vradBsp*filesystem.Bsp, faceIndex int) *FaceInfo{
 	face := (*vradBsp.GetFaces())[faceIndex]
 	plane := vradBsp.Planes[face.Planenum]
 	lightmapWidth := int(face.LightmapTextureSizeInLuxels[0] + 1)

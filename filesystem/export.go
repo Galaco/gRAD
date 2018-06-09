@@ -1,4 +1,4 @@
-package bsp
+package filesystem
 
 import (
 	"github.com/galaco/bsp"
@@ -7,7 +7,7 @@ import (
 
 // ExportToFile
 // Exports the Radiosity Bsp structure back out to a file
-func ExportToFile(filename string, vradBsp *Bsp) error {
+func ExportToFile(filename string, exportable *bsp.Bsp) error {
 	// Load bsp back into memory
 	file,err := os.Open(filename)
 	if err != nil {
@@ -22,7 +22,7 @@ func ExportToFile(filename string, vradBsp *Bsp) error {
 	file.Close()
 
 	// Inject modified lumps into target bsp
-	baseFile,err = updateLumps(baseFile, vradBsp)
+	baseFile,err = updateLumps(baseFile, exportable)
 	if err != nil {
 		return err
 	}
@@ -37,7 +37,7 @@ func ExportToFile(filename string, vradBsp *Bsp) error {
 
 // updateLumps
 // Insert modified lumps into bsp
-func updateLumps(base *bsp.Bsp, target *Bsp) (*bsp.Bsp,error) {
+func updateLumps(base *bsp.Bsp, target *bsp.Bsp) (*bsp.Bsp,error) {
 
 
 	return base,nil

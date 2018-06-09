@@ -1,10 +1,9 @@
-package bsp
+package radable
 
 import (
 	"github.com/galaco/bsp"
-	"os"
-	"github.com/galaco/bsp/primitives/brush"
-	"github.com/galaco/bsp/primitives/brushside"
+	"strings"
+	"github.com/galaco/vmf"
 	"github.com/galaco/bsp/primitives/plane"
 	"github.com/galaco/bsp/primitives/texdata"
 	"github.com/go-gl/mathgl/mgl32"
@@ -13,60 +12,22 @@ import (
 	"github.com/galaco/bsp/primitives/face"
 	"github.com/galaco/bsp/primitives/leaf"
 	"github.com/galaco/bsp/primitives/model"
+	"github.com/galaco/bsp/primitives/brush"
+	"github.com/galaco/bsp/primitives/brushside"
 	"github.com/galaco/bsp/primitives/area"
 	"github.com/galaco/bsp/primitives/areaportal"
 	"github.com/galaco/bsp/primitives/mapflags"
 	"github.com/galaco/source-tools-common/entity"
-	"github.com/galaco/vmf"
-	"strings"
 	"github.com/galaco/source-tools-common/texdatastringtable"
 	"log"
+	"github.com/galaco/gRAD/radable/light"
+	"github.com/galaco/gRAD/radable/kd"
 )
 
-// Load
-// Import a BSP into a format containing everything needed for rad
-func ImportFromFile(filename string) (*Bsp,error) {
-	file,err := getRawBSP(filename)
+func GenerateRadiosityPrimitives(file *bsp.Bsp) (*RadPrimitive, error) {
+	radBSP := RadPrimitive{}
 
-
-	if err != nil {
-		return nil, err
-	}
-
-	log.Printf("     Compile target info:        \n")
-	log.Printf("Target: %s\n", filename)
-	log.Printf("BSP version: %d\n", file.GetHeader().Version)
-	log.Printf("File revision: %d\n\n", file.GetHeader().Revision)
-
-	return transformRawBspToRadBsp(file)
-}
-
-// getRawBSP
-// Read raw file to bsp package format.
-func getRawBSP(filename string) (*bsp.Bsp, error) {
-	// Read file
-	handle,err := os.Open(filename)
-	if err != nil {
-		return nil, err
-	}
-
-	// Import file as bsp lib bsp
-	reader := bsp.NewReader(handle)
-
-	rawBSP,err := reader.Read()
-	handle.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	return rawBSP, nil
-}
-
-// transformRawBspToRadBsp
-// Transform generic bsp to rad specific format.
-// Essentially adds methods to structs, and only contains relevant lump data
-func transformRawBspToRadBsp(file *bsp.Bsp) (*Bsp, error) {
-	radBSP := Bsp{}
+	// Fetch unmodified primitives
 	radBSP.Planes = (*file.GetLump(bsp.LUMP_PLANES).GetContents()).GetData().([]plane.Plane)
 	radBSP.texData = *(*file.GetLump(bsp.LUMP_TEXDATA).GetContents()).GetData().(*[]texdata.TexData)
 	radBSP.Vertexes = *(*file.GetLump(bsp.LUMP_VERTEXES).GetContents()).GetData().(*[]mgl32.Vec3)
@@ -87,20 +48,85 @@ func transformRawBspToRadBsp(file *bsp.Bsp) (*Bsp, error) {
 	radBSP.facesHDR = *(*file.GetLump(bsp.LUMP_FACES_HDR).GetContents()).GetData().(*[]face.Face)
 
 	//Entities
+	var err error
 	entData := *(*file.GetLump(bsp.LUMP_ENTITIES).GetContents()).GetData().(*string)
-	entDataReader := strings.NewReader(entData)
-	vmfReader := vmf.NewReader(entDataReader)
-	vmfEntities,err := vmfReader.Read()
+	radBSP.Entities,err = createEntityList(entData)
 	if err != nil {
 		return nil, err
 	}
-	radBSP.entities = entity.FromVmfNodeTree(vmfEntities.Unclassified)
 
 	// TexDataStringTable
-	stringData := *(*file.GetLump(bsp.LUMP_TEXDATA_STRING_DATA).GetContents()).GetData().(*string)
-	stringTable := *(*file.GetLump(bsp.LUMP_TEXDATA_STRING_TABLE).GetContents()).GetData().(*[]int32)
-	radBSP.texDataStringTable = *texdatastringtable.NewTable(stringData, stringTable)
-
+	radBSP.TexDataStringTable = createStringTable(
+		*(*file.GetLump(bsp.LUMP_TEXDATA_STRING_DATA).GetContents()).GetData().(*string),
+		*(*file.GetLump(bsp.LUMP_TEXDATA_STRING_TABLE).GetContents()).GetData().(*[]int32))
 
 	return &radBSP, nil
+}
+
+// createEntityList
+// Creates a set of entities from entdata string lump
+func createEntityList(entData string) (entity.List, error) {
+	entDataReader := strings.NewReader(entData)
+	vmfReader := vmf.NewReader(entDataReader)
+	vmfEntities, err := vmfReader.Read()
+	if err != nil {
+		return entity.List{}, err
+	}
+	return entity.FromVmfNodeTree(vmfEntities.Unclassified), nil
+}
+
+// createStringTable
+// create TexDataStringTable from TexData and TexInfo
+func createStringTable(stringData string, tableData []int32) texdatastringtable.TexDataStringTable {
+	return *texdatastringtable.NewTable(stringData, tableData)
+}
+
+// ExtractLights
+func ExtractLights(primitives *RadPrimitive, useHDR bool) {
+	log.Printf("Extracting lights from entdata...")
+	var worldLights []light.DirectLight
+	var ambientLight light.DirectLight
+
+	var numLights = 0
+	for i := 0; i < primitives.Entities.Length(); i++ {
+		e := primitives.Entities.Get(i)
+		classname := e.ValueForKey("classname")
+		if strings.Contains(classname, "light") == false {
+			continue
+		}
+		numLights++
+		l := light.NewDirectLight(e)
+
+		if classname == "light" {
+			light.ParseLightGeneric(e, l, useHDR)
+			worldLights = append(worldLights, *l)
+			continue
+		}
+		if classname == "light_environment" {
+			light.ParseLightGeneric(e, l, useHDR)
+			light.ParseLightEnvironment(e, l, useHDR)
+			ambientLight = *l
+			continue
+		}
+		if classname == "light_spot" {
+			light.ParseLightGeneric(e, l, useHDR)
+			light.ParseLightSpot(e, l, &primitives.Entities)
+			worldLights = append(worldLights, *l)
+			continue
+		}
+
+	}
+
+	log.Printf("Found %d Facelights\n\n", numLights)
+
+	primitives.WorldLights = worldLights
+	primitives.AmbientLight = ambientLight
+}
+
+
+// GenerateKDTree
+// Build KD Tree to handling faces per leaf
+func GenerateKDTree(primitives *RadPrimitive) {
+	log.Printf("Building visibility tree...")
+	kd.BuildTree()
 }

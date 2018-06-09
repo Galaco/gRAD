@@ -5,7 +5,8 @@ import (
 	"log"
 	"time"
 	"github.com/galaco/bsp/flags"
-	"github.com/galaco/gRAD/bsp"
+	"github.com/galaco/gRAD/filesystem"
+	"github.com/galaco/gRAD/simulator/kd"
 )
 
 type Edge struct {
@@ -21,14 +22,14 @@ type Triangle struct {
 type RayTracer struct {
 	Triangles []Triangle
 	NumTriangles int
-	TreeRoot *KDNode
+	TreeRoot *kd.Node
 }
 
 func NewRayTracer() *RayTracer {
 	return &RayTracer{}
 }
 
-func (tracer *RayTracer) SetupAccelerationStructure(vradBsp *bsp.Bsp) {
+func (tracer *RayTracer) SetupAccelerationStructure(vradBsp *filesystem.Bsp) {
 	log.Printf("Setting up ray-trace acceleration structure...\n")
 	// Time preparation
 	setupStart := time.Now().UnixNano() / int64(time.Millisecond)
@@ -130,7 +131,7 @@ func (tracer *RayTracer) LOS_blocked(startPos mgl32.Vec3, endPos mgl32.Vec3) boo
 	}
 
 	type StackEntry struct {
-		pNode *KDNode
+		pNode *kd.Node
 		start mgl32.Vec3
 		end mgl32.Vec3
 	}
@@ -143,7 +144,7 @@ func (tracer *RayTracer) LOS_blocked(startPos mgl32.Vec3, endPos mgl32.Vec3) boo
 		startPos,
 		endPos,
 	}
-	stackSize++
+	//stackSize++
 
 	for stackSize > 0 {
 		if stackSize >= 1024 {
@@ -151,7 +152,7 @@ func (tracer *RayTracer) LOS_blocked(startPos mgl32.Vec3, endPos mgl32.Vec3) boo
 			return false
 		}
 
-		stackSize--
+		//stackSize--
 		entry := &stack[stackSize]
 
 		pNode := entry.pNode
@@ -160,12 +161,12 @@ func (tracer *RayTracer) LOS_blocked(startPos mgl32.Vec3, endPos mgl32.Vec3) boo
 
 		length := dist(start, end)
 
-		children := pNode.Children
+		children := &pNode.Children
 
 		var t float32
 
 		switch pNode.Type {
-		case NODETYPE_LEAF:
+		case kd.NODETYPE_LEAF:
 			for ti := 0; ti < pNode.NumTris; ti++ {
 				tri := &tracer.Triangles[pNode.TriangleIds[ti]]
 
@@ -184,21 +185,21 @@ func (tracer *RayTracer) LOS_blocked(startPos mgl32.Vec3, endPos mgl32.Vec3) boo
 
 			break
 
-		case NODETYPE_NODE:
+		case kd.NODETYPE_NODE:
 			var dirPositive bool
 
 			switch pNode.Axis {
-			case AXIS_X:
+			case kd.AXIS_X:
 				t = (pNode.Pos - start.X()) * invDir.X()
 				dirPositive = dir.X() >= 0.0
 				break
 
-			case AXIS_Y:
+			case kd.AXIS_Y:
 				t = (pNode.Pos - start.Y()) * invDir.Y()
 				dirPositive = dir.Y() >= 0.0
 				break
 
-			case AXIS_Z:
+			case kd.AXIS_Z:
 				t = (pNode.Pos - start.Z()) * invDir.Z()
 				dirPositive = dir.Z() >= 0.0
 				break

@@ -4,7 +4,7 @@ import (
 	"log"
 	"github.com/samuel/go-opencl/cl"
 	"unsafe"
-	"github.com/galaco/gRAD/bsp"
+	"github.com/galaco/gRAD/filesystem"
 )
 
 // sendRayTracerToGPU
@@ -26,7 +26,7 @@ func sendRayTracerToDevice(context *cl.Context, queue *cl.CommandQueue, tracer *
 }
 
 //sendBspToGPU
-func sendBspToDevice(context *cl.Context, queue *cl.CommandQueue, vradBsp *bsp.Bsp) (*DeviceBsp,error) {
+func sendBspToDevice(context *cl.Context, queue *cl.CommandQueue, vradBsp *filesystem.Bsp) (*DeviceBsp,error) {
 	log.Printf("Sending BSP to device target...\n")
 
 	// Whats gonna happen here?

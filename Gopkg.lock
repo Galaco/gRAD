@@ -68,12 +68,6 @@
 
 [[projects]]
   branch = "master"
-  name = "github.com/rainliu/gocl"
-  packages = ["cl"]
-  revision = "b13bb0e071db9ebab2851952439c06d97ead9430"
-
-[[projects]]
-  branch = "master"
   name = "github.com/samuel/go-opencl"
   packages = ["cl"]
   revision = "cbcfd10c32ad8fcde8ba7a9d9322a2c2458f0ce5"
@@ -88,11 +82,11 @@
   branch = "master"
   name = "golang.org/x/image"
   packages = ["math/f32"]
-  revision = "f315e440302883054d0c2bd85486878cb4f8572c"
+  revision = "af66defab954cb421ca110193eed9477c8541e2a"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "405dd055c4810f06e695cf9d6b50cd3251ed81e389e3eefb018f0e8bbc6070eb"
+  inputs-digest = "ae0f647f99dea6050644c912778b45e7dc4126ebc089666be108ff08447e82ba"
   solver-name = "gps-cdcl"
   solver-version = 1

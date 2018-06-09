@@ -3,10 +3,8 @@ package main
 import (
 	"log"
 	"github.com/urfave/cli"
-	"github.com/galaco/gRAD/bsp"
-	"github.com/galaco/gRAD/simulator"
-	"github.com/galaco/gRAD/simulator/opencl"
-	"github.com/galaco/gRAD/simulator/cpu"
+	"github.com/galaco/gRAD/filesystem"
+	"github.com/galaco/gRAD/radable"
 )
 
 var useHDR = false
@@ -19,17 +17,27 @@ func Rad(c *cli.Context) error {
 
 	// Step 1: Load files
 	filename := c.Args().Get(0)
-	file,err := bsp.ImportFromFile(filename)
-	file.IsHDR = useHDR
-
+	file,err := filesystem.ImportFromFile(filename)
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
-	// Extract lights. Either hdr or ldr
-	file.ExtractLights()
+	log.Printf("     Compile target info:        \n")
+	log.Printf("Target: %s\n", filename)
+	log.Printf("BSP version: %d\n", file.GetHeader().Version)
+	log.Printf("File revision: %d\n\n", file.GetHeader().Revision)
 
+	primitives,err := radable.GenerateRadiosityPrimitives(file)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	radable.ExtractLights(primitives, useHDR)
+	radable.GenerateKDTree(primitives)
+
+
+	/*
 	// Step 2: Prepare environment
-	file.PrepareAmbientSamples()
+	radPrimitive.PrepareAmbientSamples()
 
 	var runner simulator.ISimulator
 
@@ -61,7 +69,7 @@ func Rad(c *cli.Context) error {
 	// if GPU return data to host
 	// Write bsp back to file
 //	bsp.ExportToFile(filename, file)
-
+*/
 
 	return nil
 }

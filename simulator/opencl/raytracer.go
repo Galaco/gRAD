@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 	"github.com/galaco/bsp/flags"
-	"github.com/galaco/gRAD/bsp"
+	"github.com/galaco/gRAD/filesystem"
 )
 
 const MAX_TRIANGLES = 256000
@@ -31,7 +31,7 @@ func NewRayTracer() *RayTracer {
 	return &RayTracer{}
 }
 
-func (tracer *RayTracer) SetupAccelerationStructure(vradBsp *bsp.Bsp) {
+func (tracer *RayTracer) SetupAccelerationStructure(vradBsp *filesystem.Bsp) {
 	log.Printf("Setting up ray-trace acceleration structure...\n")
 	// Time preparation
 	setupStart := time.Now().UnixNano() / int64(time.Millisecond)
